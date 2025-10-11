@@ -1,0 +1,20 @@
+# Node dependencies
+node_modules/
+
+# Tailwind output CSS
+styles/output.css
+
+# Truffle build artifacts
+build/
+
+# Environment variables
+.env
+
+# Mac/Windows system files
+.DS_Store
+Thumbs.db
+
+# Optional: log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
