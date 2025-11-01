@@ -54,15 +54,7 @@ vehicle-blockchain-dapp/
 │       └── contractInteraction.js   # Reusable blockchain calls
 │
 ├── server/
-│   ├── app.js                       # Express backend setup
-│   ├── routes/
-│   │   ├── dealershipRoutes.js
-│   │   ├── serviceRoutes.js
-│   │   └── companyRoutes.js
-│   └── controllers/
-│       ├── dealershipController.js
-│       ├── serviceController.js
-│       └── companyController.js
+│   └── app.js                       # Express backend setup
 │
 ├── test/
 │   └── vehicleRegistry.test.js      # Truffle smart contract tests
@@ -96,10 +88,12 @@ vehicle-blockchain-dapp/
 - Deploy contract to Ganache via Truffle migrations.
 - Write Truffle test cases to validate logic.
 
-### **Phase 4 — Backend Integration**
-- Build Express server to handle user sessions and role verification.
-- Connect frontend with backend using REST APIs.
-- Interact with smart contract functions via Web3.js from backend.
+## Architecture Decision
+     This DApp follows a fully decentralized architecture where:
+     - Frontend directly interacts with blockchain
+     - MetaMask provides secure wallet authentication
+     - Smart contracts enforce all business logic and access control
+     - No centralized backend needed, maintaining true decentralization
 
 ---
 
@@ -186,6 +180,7 @@ contract VehicleRegistry {
 
 ## Future Improvements
 
+- Vehicle accident logs
 - Add IPFS integration for storing vehicle documents (RC, insurance, etc.).  
 - Introduce vehicle resale tracking.  
 - Add multi-dealership and multi-service centre support.  
