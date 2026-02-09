@@ -5,30 +5,46 @@ export const registerVehicle = async (vehicleData) => {
     try {
         const contract = getContract();
         const account = await getCurrentAccount();
-        
+
         if (!account) {
             throw new Error('No account connected');
         }
 
-        const { vin, color, model, company, ownerName, ownerId } = vehicleData;
+        const { vin, color, model, company, ownerName, ownerId, imageIpfsHash = '', documentsIpfsHash = '' } = vehicleData;
 
         console.log('Registering vehicle with data:', vehicleData);
         console.log('From account:', account);
         console.log('Contract address:', contract.options.address);
+        console.log('IPFS hashes - Image:', imageIpfsHash, 'Documents:', documentsIpfsHash);
 
-        const tx = await contract.methods
-            .registerVehicle(vin, color, model, company, ownerName, ownerId)
-            .send({ from: account });
+        // Check if contract supports IPFS (has 9 parameters instead of 6)
+        try {
+            // Try calling with IPFS hashes (new contract)
+            const tx = await contract.methods
+                .registerVehicle(vin, color, model, company, ownerName, ownerId, imageIpfsHash, documentsIpfsHash, '')
+                .send({ from: account });
 
-        console.log('Vehicle registered successfully!');
-        console.log('Transaction hash:', tx.transactionHash);
-        console.log('Block number:', tx.blockNumber);
-        
-        // Verify the vehicle was registered
-        const registeredVehicle = await contract.methods.getVehicleDetails(vin).call();
-        console.log('Verification - Retrieved vehicle:', registeredVehicle);
-        
-        return tx;
+            console.log('Vehicle registered successfully with IPFS!');
+            console.log('Transaction hash:', tx.transactionHash);
+            console.log('Block number:', tx.blockNumber);
+
+            return tx;
+        } catch (error) {
+            // If error mentions "arguments" or "parameters", fall back to old contract
+            if (error.message.includes('arguments') || error.message.includes('parameters')) {
+                console.log('Contract does not support IPFS, using legacy registration...');
+
+                const tx = await contract.methods
+                    .registerVehicle(vin, color, model, company, ownerName, ownerId)
+                    .send({ from: account });
+
+                console.log('Vehicle registered successfully (legacy mode)!');
+                console.log('Transaction hash:', tx.transactionHash);
+
+                return tx;
+            }
+            throw error;
+        }
     } catch (error) {
         console.error('Error registering vehicle:', error);
         throw error;
@@ -107,16 +123,16 @@ export const getVehicleDetails = async (vin) => {
         console.log('Fetching vehicle details for VIN:', vin);
         const contract = getContract();
         console.log('Contract address:', contract.options.address);
-        
+
         const result = await contract.methods.getVehicleDetails(vin).call();
         console.log('Raw result from contract:', result);
-        
+
         // Web3 returns an object with numeric indices (0, 1, 2, etc.)
         // Check if result has numeric index 0
         const vinValue = result[0] || result.vin;
-        
+
         console.log('VIN value from result:', vinValue);
-        
+
         if (!vinValue || vinValue === '' || vinValue === '0') {
             console.log('Vehicle not found (empty VIN)');
             return null;
@@ -133,12 +149,60 @@ export const getVehicleDetails = async (vin) => {
             distanceRun: (result[6] || result.distanceRun).toString(),
             lastServiceDate: (result[7] || result.lastServiceDate).toString()
         };
-        
+
         console.log('Parsed vehicle:', vehicle);
 
         return vehicle;
     } catch (error) {
         console.error('Error getting vehicle details:', error);
+        throw error;
+    }
+};
+
+// Get vehicle details with IPFS hashes (for new contract)
+export const getVehicleWithDocuments = async (vin) => {
+    try {
+        console.log('Fetching vehicle with documents for VIN:', vin);
+        const contract = getContract();
+
+        // Try new contract method first
+        try {
+            const result = await contract.methods.getVehicleWithDocuments(vin).call();
+
+            const vinValue = result[0] || result.vin;
+            if (!vinValue || vinValue === '' || vinValue === '0') {
+                return null;
+            }
+
+            const vehicle = {
+                vin: result[0] || result.vin,
+                color: result[1] || result.color,
+                model: result[2] || result.model,
+                company: result[3] || result.company,
+                ownerName: result[4] || result.ownerName,
+                ownerId: result[5] || result.ownerId,
+                distanceRun: (result[6] || result.distanceRun).toString(),
+                lastServiceDate: (result[7] || result.lastServiceDate).toString(),
+                imageIpfsHash: result[8] || result.imageIpfsHash || '',
+                documentsIpfsHash: result[9] || result.documentsIpfsHash || '',
+                metadataIpfsHash: result[10] || result.metadataIpfsHash || ''
+            };
+
+            console.log('Vehicle with documents:', vehicle);
+            return vehicle;
+        } catch (error) {
+            // Fallback to old method
+            console.log('Contract does not support getVehicleWithDocuments, using fallback...');
+            const vehicle = await getVehicleDetails(vin);
+            if (vehicle) {
+                vehicle.imageIpfsHash = '';
+                vehicle.documentsIpfsHash = '';
+                vehicle.metadataIpfsHash = '';
+            }
+            return vehicle;
+        }
+    } catch (error) {
+        console.error('Error getting vehicle with documents:', error);
         throw error;
     }
 };
@@ -195,6 +259,7 @@ export default {
     registerVehicle,
     updateMileage,
     getVehicleDetails,
+    getVehicleWithDocuments,
     formatTimestamp,
     isVehicleRegistered,
     estimateGas,

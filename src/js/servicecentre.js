@@ -5,6 +5,29 @@ import { loadContract, initWeb3 } from './web3.js';
 let currentVehicle = null;
 let recentUpdates = [];
 
+// Load recent updates from localStorage
+const loadRecentUpdates = () => {
+    try {
+        const saved = localStorage.getItem('recentServiceUpdates');
+        if (saved) {
+            recentUpdates = JSON.parse(saved);
+            console.log('Loaded recent updates:', recentUpdates.length);
+        }
+    } catch (error) {
+        console.error('Error loading recent updates:', error);
+        recentUpdates = [];
+    }
+};
+
+// Save recent updates to localStorage
+const saveRecentUpdates = () => {
+    try {
+        localStorage.setItem('recentServiceUpdates', JSON.stringify(recentUpdates));
+    } catch (error) {
+        console.error('Error saving recent updates:', error);
+    }
+};
+
 const showStatus = (message, type = 'info') => {
     const statusDiv = document.getElementById('statusMessage');
     statusDiv.textContent = message;
@@ -26,9 +49,19 @@ const showStatus = (message, type = 'info') => {
 const loadContractData = async () => {
     try {
         await initWeb3();
-        
-        const contractData = await fetch('/build/contracts/VehicleRegistry.json')
-            .then(res => res.json());
+
+        // Try to load VehicleRegistryIPFS first (new contract with IPFS support)
+        let contractData;
+        try {
+            contractData = await fetch('/build/contracts/VehicleRegistryIPFS.json')
+                .then(res => res.json());
+            console.log('✅ Using VehicleRegistryIPFS contract (IPFS-enabled)');
+        } catch (error) {
+            // Fallback to old contract
+            console.warn('⚠️ VehicleRegistryIPFS not found, using old contract');
+            contractData = await fetch('/build/contracts/VehicleRegistry.json')
+                .then(res => res.json());
+        }
         
         const networkId = Object.keys(contractData.networks)[0];
         const deployedNetwork = contractData.networks[networkId];
@@ -123,6 +156,8 @@ const initializePage = async () => {
         const updateForm = document.getElementById('updateForm');
         updateForm.addEventListener('submit', handleUpdate);
 
+        // Load recent updates from localStorage
+        loadRecentUpdates();
         updateRecentList();
     } catch (error) {
         console.error('Authorization failed:', error);
@@ -199,7 +234,7 @@ const handleUpdate = async (e) => {
         showStatus('Submitting transaction to blockchain...', 'info');
 
         const tx = await updateMileage(currentVehicle.vin, newMileage);
-        
+
         recentUpdates.unshift({
             vin: currentVehicle.vin,
             mileage: newMileage
@@ -207,9 +242,12 @@ const handleUpdate = async (e) => {
         if (recentUpdates.length > 5) {
             recentUpdates.pop();
         }
-        
+
+        // Save to localStorage
+        saveRecentUpdates();
+
         updateRecentList();
-        
+
         showStatus('Mileage updated successfully!', 'success');
         
         const updatedVehicle = await getVehicleDetails(currentVehicle.vin);

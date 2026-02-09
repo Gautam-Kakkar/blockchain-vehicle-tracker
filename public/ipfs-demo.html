@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPFS Upload Demo - Vehicle Registry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                IPFS Upload Demo
+            </h1>
+            <p class="text-gray-600">Upload vehicle documents to IPFS and get blockchain-ready CIDs</p>
+        </div>
+
+        <!-- IPFS Status Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">IPFS Connection Status</h2>
+            <div id="ipfsStatus" class="space-y-2">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></span>
+                    <span class="text-gray-600">Checking IPFS status...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Single File Upload -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Single File Upload</h2>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Select File
+                </label>
+                <input
+                    type="file"
+                    id="singleFileInput"
+                    class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-400 transition-colors"
+                />
+            </div>
+
+            <button
+                id="uploadSingleBtn"
+                class="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+            >
+                Upload to IPFS
+            </button>
+
+            <div id="singleUploadResult" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Multiple Files Upload -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Multiple Files Upload</h2>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Select Documents (PDF, Images)
+                </label>
+                <input
+                    type="file"
+                    id="multipleFilesInput"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-400 transition-colors"
+                />
+            </div>
+
+            <button
+                id="uploadMultipleBtn"
+                class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+            >
+                Upload All Files
+            </button>
+
+            <div id="multipleUploadResult" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Vehicle Image Upload with Preview -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Vehicle Image Upload with Preview</h2>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Vehicle Image
+                </label>
+                <div class="flex items-center justify-center w-full">
+                    <label class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF (MAX. 10MB)</p>
+                        </div>
+                        <input id="imageInput" type="file" class="hidden" accept="image/*" />
+                    </label>
+                </div>
+            </div>
+
+            <div id="imagePreviewContainer" class="mt-4 hidden">
+                <p class="text-sm font-semibold text-gray-700 mb-2">Preview:</p>
+                <img id="imagePreview" class="w-full h-64 object-cover rounded-lg border-2 border-gray-200" />
+                <div class="mt-2 flex items-center justify-between">
+                    <span id="imageInfo" class="text-sm text-gray-600"></span>
+                    <button
+                        id="uploadImageBtn"
+                        class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-2 px-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all"
+                    >
+                        Upload to IPFS
+                    </button>
+                </div>
+            </div>
+
+            <div id="imageUploadResult" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Metadata Upload -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Upload Vehicle Metadata as JSON</h2>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Vehicle Information
+                </label>
+                <div class="grid grid-cols-2 gap-4">
+                    <input
+                        type="text"
+                        id="metaVin"
+                        placeholder="VIN"
+                        class="border border-gray-300 rounded-lg p-3"
+                    />
+                    <input
+                        type="text"
+                        id="metaModel"
+                        placeholder="Model"
+                        class="border border-gray-300 rounded-lg p-3"
+                    />
+                    <input
+                        type="text"
+                        id="metaColor"
+                        placeholder="Color"
+                        class="border border-gray-300 rounded-lg p-3"
+                    />
+                    <input
+                        type="text"
+                        id="metaOwner"
+                        placeholder="Owner Name"
+                        class="border border-gray-300 rounded-lg p-3"
+                    />
+                </div>
+            </div>
+
+            <button
+                id="uploadMetadataBtn"
+                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all"
+            >
+                Upload Metadata to IPFS
+            </button>
+
+            <div id="metadataUploadResult" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- CID Retrieval Demo -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Retrieve from IPFS</h2>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Enter IPFS CID
+                </label>
+                <input
+                    type="text"
+                    id="cidInput"
+                    placeholder="Qm..."
+                    class="w-full border border-gray-300 rounded-lg p-3 font-mono text-sm"
+                />
+            </div>
+
+            <button
+                id="retrieveBtn"
+                class="bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all"
+            >
+                Retrieve Content
+            </button>
+
+            <div id="retrieveResult" class="mt-4 hidden"></div>
+        </div>
+    </div>
+
+    <!-- IPFS Utilities -->
+    <script type="module">
+        // Import IPFS utilities
+        import {
+            initIPFS,
+            uploadToIPFS,
+            uploadMultipleToIPFS,
+            uploadMetadataToIPFS,
+            getFromIPFS,
+            getIPFSGatewayURL,
+            checkIPFSStatus,
+            fileToBase64,
+            formatFileSize
+        } from '../src/utils/ipfs.js';
+
+        // UI Elements
+        const singleFileInput = document.getElementById('singleFileInput');
+        const uploadSingleBtn = document.getElementById('uploadSingleBtn');
+        const multipleFilesInput = document.getElementById('multipleFilesInput');
+        const uploadMultipleBtn = document.getElementById('uploadMultipleBtn');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const imageInfo = document.getElementById('imageInfo');
+        const uploadImageBtn = document.getElementById('uploadImageBtn');
+        const retrieveBtn = document.getElementById('retrieveBtn');
+
+        // Initialize IPFS on page load
+        window.addEventListener('load', async () => {
+            await initIPFS();
+
+            const status = await checkIPFSStatus();
+            updateIPFSStatus(status);
+        });
+
+        // Update IPFS status display
+        function updateIPFSStatus(status) {
+            const container = document.getElementById('ipfsStatus');
+            container.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <span class="w-3 h-3 rounded-full ${status.local ? 'bg-green-500' : 'bg-red-500'} mr-2"></span>
+                    <span class="text-gray-600">Local IPFS Node: ${status.local ? 'Connected' : 'Not Available'}</span>
+                </div>
+                <div class="flex items-center mb-2">
+                    <span class="w-3 h-3 rounded-full ${status.pinata ? 'bg-green-500' : 'bg-yellow-500'} mr-2"></span>
+                    <span class="text-gray-600">Pinata: ${status.pinata ? 'Configured' : 'Not Configured'}</span>
+                </div>
+                <div class="text-sm text-gray-500 mt-2">
+                    ${!status.local && !status.pinata ? '⚠️ No IPFS connection available. Please install IPFS Desktop or configure Pinata.' : ''}
+                </div>
+            `;
+        }
+
+        // Show result message
+        function showResult(containerId, success, message, data = null) {
+            const container = document.getElementById(containerId);
+            container.classList.remove('hidden');
+
+            if (success) {
+                container.innerHTML = `
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                        <div class="flex">
+                            <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div>
+                                <p class="font-bold text-green-700">${message}</p>
+                                ${data ? `
+                                    <div class="mt-2 space-y-1 text-sm">
+                                        <p><strong>CID:</strong> <code class="bg-green-100 px-2 py-1 rounded">${data.cid}</code></p>
+                                        <p><strong>Gateway URL:</strong> <a href="${data.urls?.pinata || data.url}" target="_blank" class="text-blue-600 hover:underline">${data.urls?.pinata || data.url}</a></p>
+                                        ${data.size ? `<p><strong>Size:</strong> ${formatFileSize(data.size)}</p>` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                        <div class="flex">
+                            <svg class="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div>
+                                <p class="font-bold text-red-700">Error</p>
+                                <p class="text-red-600">${message}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Single file upload
+        singleFileInput.addEventListener('change', () => {
+            uploadSingleBtn.disabled = singleFileInput.files.length === 0;
+        });
+
+        uploadSingleBtn.addEventListener('click', async () => {
+            const file = singleFileInput.files[0];
+            if (!file) return;
+
+            uploadSingleBtn.disabled = true;
+            uploadSingleBtn.textContent = 'Uploading...';
+
+            const result = await uploadToIPFS(file);
+
+            showResult('singleUploadResult', result.success, result.success ? 'File uploaded successfully!' : 'Upload failed', result);
+
+            uploadSingleBtn.disabled = false;
+            uploadSingleBtn.textContent = 'Upload to IPFS';
+        });
+
+        // Multiple files upload
+        multipleFilesInput.addEventListener('change', () => {
+            uploadMultipleBtn.disabled = multipleFilesInput.files.length === 0;
+        });
+
+        uploadMultipleBtn.addEventListener('click', async () => {
+            const files = Array.from(multipleFilesInput.files);
+            if (files.length === 0) return;
+
+            uploadMultipleBtn.disabled = true;
+            uploadMultipleBtn.textContent = 'Uploading...';
+
+            const result = await uploadMultipleToIPFS(files);
+
+            if (result.success) {
+                const container = document.getElementById('multipleUploadResult');
+                container.classList.remove('hidden');
+
+                let html = `
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                        <p class="font-bold text-green-700 mb-2">✓ Uploaded ${result.successCount} of ${result.total} files</p>
+                        <div class="space-y-2">
+                `;
+
+                result.files.forEach(file => {
+                    const statusColor = file.success ? 'green' : 'red';
+                    html += `
+                        <div class="bg-${statusColor}-100 p-2 rounded text-sm">
+                            <p><strong>${file.fileName}</strong> (${formatFileSize(file.fileSize)})</p>
+                            ${file.success ? `<p class="text-xs text-gray-600">CID: ${file.cid.substring(0, 20)}...</p>` : `<p class="text-red-600 text-xs">${file.error}</p>`}
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+                container.innerHTML = html;
+            } else {
+                showResult('multipleUploadResult', false, result.error);
+            }
+
+            uploadMultipleBtn.disabled = false;
+            uploadMultipleBtn.textContent = 'Upload All Files';
+        });
+
+        // Image upload with preview
+        imageInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Show preview
+            const base64 = await fileToBase64(file);
+            imagePreview.src = base64;
+            imagePreviewContainer.classList.remove('hidden');
+            imageInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
+        });
+
+        uploadImageBtn.addEventListener('click', async () => {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            uploadImageBtn.disabled = true;
+            uploadImageBtn.textContent = 'Uploading...';
+
+            const result = await uploadToIPFS(file, { name: 'vehicle-image' });
+
+            showResult('imageUploadResult', result.success, result.success ? 'Image uploaded successfully!' : 'Upload failed', result);
+
+            uploadImageBtn.disabled = false;
+            uploadImageBtn.textContent = 'Upload to IPFS';
+        });
+
+        // Metadata upload
+        document.getElementById('uploadMetadataBtn').addEventListener('click', async () => {
+            const metadata = {
+                vin: document.getElementById('metaVin').value,
+                model: document.getElementById('metaModel').value,
+                color: document.getElementById('metaColor').value,
+                owner: document.getElementById('metaOwner').value,
+                uploadedAt: new Date().toISOString(),
+                app: 'vehicle-registry'
+            };
+
+            if (!metadata.vin || !metadata.model) {
+                showResult('metadataUploadResult', false, 'Please fill in required fields');
+                return;
+            }
+
+            const result = await uploadMetadataToIPFS(metadata);
+
+            showResult('metadataUploadResult', result.success, result.success ? 'Metadata uploaded successfully!' : 'Upload failed', result);
+        });
+
+        // Retrieve from IPFS
+        retrieveBtn.addEventListener('click', async () => {
+            const cid = document.getElementById('cidInput').value.trim();
+            if (!cid) return;
+
+            retrieveBtn.disabled = true;
+            retrieveBtn.textContent = 'Retrieving...';
+
+            const result = await getFromIPFS(cid);
+
+            const container = document.getElementById('retrieveResult');
+            container.classList.remove('hidden');
+
+            if (result.success) {
+                // Try to parse as JSON
+                try {
+                    const json = JSON.parse(result.data.toString());
+                    container.innerHTML = `
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                            <p class="font-bold text-blue-700 mb-2">✓ Content Retrieved (JSON)</p>
+                            <pre class="bg-white p-3 rounded text-xs overflow-auto max-h-64">${JSON.stringify(json, null, 2)}</pre>
+                        </div>
+                    `;
+                } catch (e) {
+                    // Not JSON, show as text
+                    container.innerHTML = `
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                            <p class="font-bold text-blue-700 mb-2">✓ Content Retrieved</p>
+                            <p class="text-sm text-gray-600 mb-2">Size: ${formatFileSize(result.size)}</p>
+                            <pre class="bg-white p-3 rounded text-xs overflow-auto max-h-64">${result.data.toString().substring(0, 500)}...</pre>
+                        </div>
+                    `;
+                }
+            } else {
+                showResult('retrieveResult', false, result.error);
+            }
+
+            retrieveBtn.disabled = false;
+            retrieveBtn.textContent = 'Retrieve Content';
+        });
+    </script>
+</body>
+</html>

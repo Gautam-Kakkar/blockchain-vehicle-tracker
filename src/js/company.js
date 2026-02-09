@@ -1,8 +1,32 @@
 import { getCurrentAccount, checkAuthorization, logout, loadRoleAddressesFromContract, getAccountRole } from './auth.js';
-import { getVehicleDetails, formatTimestamp } from '../utils/contractInteraction.js';
+import { getVehicleDetails, getVehicleWithDocuments, formatTimestamp } from '../utils/contractInteraction.js';
 import { loadContract, initWeb3 } from './web3.js';
+import { getIPFSGatewayURL } from '../utils/ipfs.js';
 
 let recentVerifications = [];
+
+// Load recent verifications from localStorage
+const loadRecentVerifications = () => {
+    try {
+        const saved = localStorage.getItem('recentVehicleVerifications');
+        if (saved) {
+            recentVerifications = JSON.parse(saved);
+            console.log('Loaded recent verifications:', recentVerifications.length);
+        }
+    } catch (error) {
+        console.error('Error loading recent verifications:', error);
+        recentVerifications = [];
+    }
+};
+
+// Save recent verifications to localStorage
+const saveRecentVerifications = () => {
+    try {
+        localStorage.setItem('recentVehicleVerifications', JSON.stringify(recentVerifications));
+    } catch (error) {
+        console.error('Error saving recent verifications:', error);
+    }
+};
 
 const showStatus = (message, type = 'info') => {
     const statusDiv = document.getElementById('statusMessage');
@@ -25,9 +49,19 @@ const showStatus = (message, type = 'info') => {
 const loadContractData = async () => {
     try {
         await initWeb3();
-        
-        const contractData = await fetch('/build/contracts/VehicleRegistry.json')
-            .then(res => res.json());
+
+        // Try to load VehicleRegistryIPFS first (new contract with IPFS support)
+        let contractData;
+        try {
+            contractData = await fetch('/build/contracts/VehicleRegistryIPFS.json')
+                .then(res => res.json());
+            console.log('✅ Using VehicleRegistryIPFS contract (IPFS-enabled)');
+        } catch (error) {
+            // Fallback to old contract
+            console.warn('⚠️ VehicleRegistryIPFS not found, using old contract');
+            contractData = await fetch('/build/contracts/VehicleRegistry.json')
+                .then(res => res.json());
+        }
         
         const networkId = Object.keys(contractData.networks)[0];
         const deployedNetwork = contractData.networks[networkId];
@@ -48,17 +82,102 @@ const loadContractData = async () => {
 };
 
 const displayVehicleInfo = (vehicle) => {
-    document.getElementById('infoVin').textContent = vehicle.vin;
-    document.getElementById('infoModel').textContent = vehicle.model;
-    document.getElementById('infoColor').textContent = vehicle.color;
-    document.getElementById('infoCompany').textContent = vehicle.company;
-    document.getElementById('infoOwnerName').textContent = vehicle.ownerName;
-    document.getElementById('infoOwnerId').textContent = vehicle.ownerId;
-    document.getElementById('infoDistance').textContent = `${parseInt(vehicle.distanceRun).toLocaleString()} km`;
+    console.log('📋 displayVehicleInfo called with vehicle:', vehicle);
+    console.log('Vehicle type:', typeof vehicle);
+    console.log('Vehicle keys:', vehicle ? Object.keys(vehicle) : 'N/A');
+
+    // Check if vehicle exists
+    if (!vehicle) {
+        console.error('❌ Vehicle is null or undefined');
+        showNotFound();
+        return;
+    }
+
+    // Basic vehicle details
+    document.getElementById('infoVin').textContent = vehicle.vin || 'N/A';
+    document.getElementById('infoModel').textContent = vehicle.model || 'N/A';
+    document.getElementById('infoColor').textContent = vehicle.color || 'N/A';
+    document.getElementById('infoCompany').textContent = vehicle.company || 'N/A';
+    document.getElementById('infoOwnerName').textContent = vehicle.ownerName || 'N/A';
+    document.getElementById('infoOwnerId').textContent = vehicle.ownerId || 'N/A';
+    document.getElementById('infoDistance').textContent = `${parseInt(vehicle.distanceRun || 0).toLocaleString()} km`;
     document.getElementById('infoServiceDate').textContent = formatTimestamp(vehicle.lastServiceDate);
-    
+
+    // Display vehicle image from IPFS
+    const vehicleImageContainer = document.getElementById('vehicleImageContainer');
+    const vehicleImage = document.getElementById('vehicleImage');
+    const noImageText = document.getElementById('noImageText');
+
+    console.log('Image IPFS Hash:', vehicle.imageIpfsHash);
+    console.log('Documents IPFS Hash:', vehicle.documentsIpfsHash);
+
+    if (vehicle.imageIpfsHash && vehicle.imageIpfsHash !== '') {
+        try {
+            const imageUrl = getIPFSGatewayURL(vehicle.imageIpfsHash);
+            console.log('🖼️ Image URL:', imageUrl);
+
+            if (imageUrl && imageUrl !== '') {
+                vehicleImage.src = imageUrl;
+                vehicleImageContainer.classList.remove('hidden');
+                noImageText.classList.add('hidden');
+                console.log('✅ Vehicle image displayed');
+            } else {
+                console.warn('⚠️ Failed to get image URL');
+                vehicleImageContainer.classList.add('hidden');
+                noImageText.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('❌ Error displaying image:', error);
+            console.error('Error stack:', error.stack);
+            vehicleImageContainer.classList.add('hidden');
+            noImageText.classList.remove('hidden');
+        }
+    } else {
+        vehicleImageContainer.classList.add('hidden');
+        noImageText.classList.remove('hidden');
+        console.log('ℹ️ No image hash for this vehicle');
+    }
+
+    // Display documents from IPFS
+    const documentsContainer = document.getElementById('documentsContainer');
+    const noDocumentsText = document.getElementById('noDocumentsText');
+
+    if (vehicle.documentsIpfsHash && vehicle.documentsIpfsHash !== '') {
+        try {
+            const documentsUrl = getIPFSGatewayURL(vehicle.documentsIpfsHash);
+            console.log('📄 Documents URL:', documentsUrl);
+
+            if (documentsUrl && documentsUrl !== '') {
+                documentsContainer.innerHTML = `
+                    <a href="${documentsUrl}"
+                       target="_blank"
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        View All Documents (IPFS)
+                    </a>
+                    <p class="text-xs text-gray-500 mt-1">CID: ${vehicle.documentsIpfsHash.substring(0, 20)}...</p>
+                `;
+                noDocumentsText.classList.add('hidden');
+                console.log('✅ Documents link created');
+            } else {
+                console.warn('⚠️ Failed to get documents URL');
+                documentsContainer.innerHTML = '<p class="text-gray-400 italic">No documents available</p>';
+            }
+        } catch (error) {
+            console.error('❌ Error displaying documents:', error);
+            console.error('Error stack:', error.stack);
+            documentsContainer.innerHTML = '<p class="text-gray-400 italic">No documents available</p>';
+        }
+    } else {
+        documentsContainer.innerHTML = '<p class="text-gray-400 italic">No documents available</p>';
+        console.log('ℹ️ No document hash for this vehicle');
+    }
+
     document.getElementById('vehicleInfo').classList.remove('hidden');
     document.getElementById('notFoundMessage').classList.add('hidden');
+    console.log('✅ Vehicle info displayed successfully');
 };
 
 const showNotFound = () => {
@@ -126,6 +245,8 @@ const initializePage = async () => {
         const verifyForm = document.getElementById('verifyForm');
         verifyForm.addEventListener('submit', handleVerify);
 
+        // Load recent verifications from localStorage
+        loadRecentVerifications();
         updateRecentList();
     } catch (error) {
         console.error('Authorization failed:', error);
@@ -138,24 +259,30 @@ const initializePage = async () => {
 
 const handleVerify = async (e) => {
     e.preventDefault();
-    
+
     const verifyBtn = e.target.querySelector('button[type="submit"]');
     const originalText = verifyBtn.textContent;
-    
+
     try {
         verifyBtn.disabled = true;
         verifyBtn.textContent = 'Verifying...';
-        
+
         const vin = document.getElementById('verifyVin').value.trim();
-        
+
         if (!vin) {
             throw new Error('Please enter a VIN');
         }
 
         showStatus('Verifying on blockchain...', 'info');
 
-        const vehicle = await getVehicleDetails(vin);
-        
+        // Try to get vehicle with IPFS documents first
+        let vehicle = await getVehicleWithDocuments(vin);
+
+        // Fallback to old method if new contract doesn't support IPFS
+        if (!vehicle) {
+            vehicle = await getVehicleDetails(vin);
+        }
+
         if (!vehicle) {
             showNotFound();
             showStatus('Vehicle not found in blockchain registry', 'error');
@@ -163,15 +290,18 @@ const handleVerify = async (e) => {
         }
 
         displayVehicleInfo(vehicle);
-        showStatus('Vehicle verified successfully!', 'success');
-        
+        showStatus('✓ Vehicle verified successfully with IPFS documents!', 'success');
+
         recentVerifications.unshift(vehicle);
         if (recentVerifications.length > 5) {
             recentVerifications.pop();
         }
-        
+
+        // Save to localStorage
+        saveRecentVerifications();
+
         updateRecentList();
-        
+
     } catch (error) {
         console.error('Verification error:', error);
         showStatus(`Error: ${error.message}`, 'error');
