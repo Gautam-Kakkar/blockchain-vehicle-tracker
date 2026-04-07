@@ -1,7 +1,7 @@
 import { getCurrentAccount, checkAuthorization, logout, loadRoleAddressesFromContract, getAccountRole } from './auth.js';
 import { registerVehicle } from '../utils/contractInteraction.js';
 import { loadContract, initWeb3 } from './web3.js';
-import { uploadToPinata, uploadMultipleToIPFS, uploadVehicleMetadata, fileToBase64, formatFileSize } from '../utils/ipfs.js';
+import { uploadToPinata, uploadMultipleToIPFS, uploadMetadataToIPFS, fileToBase64, formatFileSize } from '../utils/ipfs.js';
 
 let recentRegistrations = [];
 
@@ -197,39 +197,39 @@ const handleDocumentsUpload = async (files) => {
             metadata: { type: 'vehicle-documents' }
         });
 
-        if (result.success) {
-            // Create metadata with all document CIDs
-            const documentsMetadata = {
-                vehicleDocuments: result.files.map(f => ({
-                    name: f.fileName,
-                    cid: f.cid,
-                    size: f.fileSize,
-                    uploadedAt: Date.now()
-                })),
-                totalFiles: result.files.length,
-                uploadedAt: new Date().toISOString()
-            };
-
-            // Upload metadata to IPFS
-            const metadataResult = await uploadVehicleMetadata(
-                {}, // Will be filled with vehicle data later
-                null,
-                result.files.filter(f => f.success).map(f => f.cid)
-            );
-
-            if (metadataResult.success) {
-                documentsIpfsHash = metadataResult.cid;
-
-                // Update status
-                document.getElementById('documentsStatusText').textContent = `✓ ${result.successCount} files uploaded`;
-                document.getElementById('documentsStatusText').className = 'text-sm font-semibold text-green-600';
-
-                showStatus(`${result.successCount} document(s) uploaded to IPFS!`, 'success');
-                return metadataResult.cid;
-            }
-        } else {
-            throw new Error(result.error);
+        if (!result.success) {
+            throw new Error(result.error || 'Document upload failed');
         }
+
+        const successfulFiles = result.files.filter(f => f.success);
+        if (successfulFiles.length === 0) {
+            throw new Error('No document files were uploaded successfully');
+        }
+
+        const documentsMetadata = {
+            type: 'vehicle-documents',
+            totalFiles: successfulFiles.length,
+            uploadedAt: new Date().toISOString(),
+            files: successfulFiles.map(f => ({
+                name: f.fileName,
+                cid: f.cid,
+                size: f.fileSize,
+                type: f.fileType
+            }))
+        };
+
+        const metadataResult = await uploadMetadataToIPFS(documentsMetadata);
+        if (!metadataResult.success) {
+            throw new Error(metadataResult.error || 'Failed to upload document metadata');
+        }
+
+        documentsIpfsHash = metadataResult.cid;
+
+        document.getElementById('documentsStatusText').textContent = `✓ ${successfulFiles.length} file(s) uploaded`;
+        document.getElementById('documentsStatusText').className = 'text-sm font-semibold text-green-600';
+
+        showStatus(`${successfulFiles.length} document(s) uploaded to IPFS!`, 'success');
+        return metadataResult.cid;
     } catch (error) {
         console.error('Documents upload error:', error);
 

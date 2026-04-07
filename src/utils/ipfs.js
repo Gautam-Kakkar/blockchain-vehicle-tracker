@@ -219,12 +219,9 @@ export const uploadMultipleToIPFS = async (files, options = {}) => {
 export const uploadMetadataToIPFS = async (metadata) => {
     try {
         const jsonString = JSON.stringify(metadata, null, 2);
-        const buffer = Buffer.from(jsonString);
+        const metadataFile = new File([jsonString], 'metadata.json', { type: 'application/json' });
 
-        const result = await uploadToIPFS(
-            new File([buffer], 'metadata.json', { type: 'application/json' }),
-            { name: 'vehicle-metadata' }
-        );
+        const result = await uploadToIPFS(metadataFile, { name: 'vehicle-metadata' });
 
         if (result.success) {
             console.log('✅ Metadata uploaded:', result.cid);
