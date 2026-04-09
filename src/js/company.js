@@ -81,7 +81,7 @@ const loadContractData = async () => {
     }
 };
 
-const displayVehicleInfo = (vehicle) => {
+const displayVehicleInfo = async (vehicle) => {
     console.log('📋 displayVehicleInfo called with vehicle:', vehicle);
     console.log('Vehicle type:', typeof vehicle);
     console.log('Vehicle keys:', vehicle ? Object.keys(vehicle) : 'N/A');
@@ -145,30 +145,70 @@ const displayVehicleInfo = (vehicle) => {
     if (vehicle.documentsIpfsHash && vehicle.documentsIpfsHash !== '') {
         try {
             const documentsUrl = getIPFSGatewayURL(vehicle.documentsIpfsHash);
-            console.log('📄 Documents URL:', documentsUrl);
+            console.log('📄 Documents metadata URL:', documentsUrl);
 
-            if (documentsUrl && documentsUrl !== '') {
+            if (!documentsUrl) {
+                throw new Error('Failed to resolve documents gateway URL');
+            }
+
+            // documentsIpfsHash stores metadata JSON with per-file CIDs. Resolve and render direct file links.
+            const metadataResponse = await fetch(documentsUrl);
+
+            if (!metadataResponse.ok) {
+                throw new Error(`Failed to fetch documents metadata (${metadataResponse.status})`);
+            }
+
+            const metadata = await metadataResponse.json();
+            const files = Array.isArray(metadata.files) ? metadata.files : [];
+
+            if (files.length === 0) {
+                documentsContainer.innerHTML = '<p class="text-gray-400 italic">No documents available</p>';
+            } else {
+                const fileLinks = files.map((file, index) => {
+                    const fileUrl = getIPFSGatewayURL(file.cid);
+                    const fileName = file.name || `Document ${index + 1}`;
+                    const fileType = file.type || 'unknown';
+
+                    return `
+                        <a href="${fileUrl}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-md mr-2 mb-2">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            ${fileName}
+                        </a>
+                        <p class="text-xs text-gray-500 mb-2">Type: ${fileType}</p>
+                    `;
+                }).join('');
+
                 documentsContainer.innerHTML = `
-                    <a href="${documentsUrl}"
-                       target="_blank"
-                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-md">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        View All Documents (IPFS)
-                    </a>
-                    <p class="text-xs text-gray-500 mt-1">CID: ${vehicle.documentsIpfsHash.substring(0, 20)}...</p>
+                    <div class="mb-2">
+                        ${fileLinks}
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Metadata CID: ${vehicle.documentsIpfsHash.substring(0, 20)}...</p>
                 `;
                 noDocumentsText.classList.add('hidden');
-                console.log('✅ Documents link created');
-            } else {
-                console.warn('⚠️ Failed to get documents URL');
-                documentsContainer.innerHTML = '<p class="text-gray-400 italic">No documents available</p>';
+                console.log(`✅ Rendered ${files.length} document link(s)`);
             }
         } catch (error) {
             console.error('❌ Error displaying documents:', error);
             console.error('Error stack:', error.stack);
-            documentsContainer.innerHTML = '<p class="text-gray-400 italic">No documents available</p>';
+
+            // Fallback: open the raw CID if metadata parsing fails (legacy records)
+            const fallbackUrl = getIPFSGatewayURL(vehicle.documentsIpfsHash);
+            documentsContainer.innerHTML = `
+                <a href="${fallbackUrl}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Open Documents
+                </a>
+            `;
         }
     } else {
         documentsContainer.innerHTML = '<p class="text-gray-400 italic">No documents available</p>';
@@ -289,7 +329,7 @@ const handleVerify = async (e) => {
             return;
         }
 
-        displayVehicleInfo(vehicle);
+        await displayVehicleInfo(vehicle);
         showStatus('✓ Vehicle verified successfully with IPFS documents!', 'success');
 
         recentVerifications.unshift(vehicle);

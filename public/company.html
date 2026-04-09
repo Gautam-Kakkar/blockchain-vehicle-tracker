@@ -3,164 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Company Dashboard - Vehicle Verification</title>
+    <title>Company Dashboard - Vehicle Registry</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <style>
+        :root {
+            --bg: #060e20;
+            --surface-low: #081329;
+            --surface-high: rgba(20, 36, 73, 0.7);
+            --surface-highest: #142449;
+            --primary: #9093ff;
+            --primary-strong: #7073ff;
+            --text: #dee5ff;
+            --muted: #9baad6;
+            --border: rgba(56, 71, 109, 0.2);
+            --tertiary: #ffb3ad;
+        }
+
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .headline-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .label-font {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .glass-card {
+            background: var(--surface-high);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .ethereal-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 100%;
+            background: radial-gradient(circle, rgba(144, 147, 255, 0.08) 0%, rgba(144, 147, 255, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 min-h-screen">
-    <nav class="bg-gradient-to-r from-purple-600 via-violet-600 to-fuchsia-600 text-white p-4 shadow-2xl">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white/20 p-2 rounded-lg">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                    </svg>
-                </div>
-                <h1 class="text-2xl font-bold">Company Verification Dashboard</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm">
-                    <span id="navAccount" class="text-sm font-mono"></span>
-                </div>
-                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105 flex items-center space-x-2 shadow-lg">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                    </svg>
-                    <span>Logout</span>
-                </button>
-            </div>
+<body class="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div class="ethereal-glow top-[-10%] left-[-10%]"></div>
+    <div class="ethereal-glow bottom-[-10%] right-[-10%]"></div>
+
+    <header class="fixed top-0 w-full z-50 bg-[#060e20]/60 backdrop-blur-md shadow-2xl shadow-indigo-950/20 px-6 lg:px-8 py-4 flex justify-between items-center border-b border-white/5">
+        <div class="flex items-center gap-8">
+            <span class="headline-font tracking-tight text-xl font-bold text-indigo-100">Vehicle Verification</span>
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="#" class="headline-font tracking-tight text-indigo-400 border-b-2 border-indigo-500 pb-1 hover:text-indigo-300 transition-colors text-sm">Verification</a>
+            </nav>
         </div>
-    </nav>
-
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto border border-purple-100">
-            <div class="flex items-center mb-6">
-                <div class="bg-gradient-to-br from-purple-500 to-fuchsia-600 p-3 rounded-xl shadow-lg mr-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">Verify Vehicle Details</h2>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 px-4 py-2 bg-[#142449] rounded-full border border-[#38476d]/30 shadow-inner">
+                <div class="w-2 h-2 rounded-full bg-[#9093ff] shadow-[0_0_8px_rgba(144,147,255,1)]"></div>
+                <span id="navAccount" class="label-font text-sm font-medium tracking-wider text-[#dee5ff]"></span>
             </div>
-            
-            <form id="verifyForm" class="mb-6">
-                <div class="flex gap-2">
-                    <input type="text" id="verifyVin" required 
-                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                           placeholder="Enter VIN to verify">
-                    <button type="submit" 
-                            class="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span>Verify</span>
-                    </button>
-                </div>
-            </form>
+            <button id="logoutBtn" class="px-5 py-2 bg-[#ffb3ad] text-[#2f0007] headline-font font-bold rounded-full active:scale-95 transition-all duration-200 shadow-lg text-sm">
+                Disconnect
+            </button>
+        </div>
+    </header>
 
-            <div id="vehicleInfo" class="hidden">
-                <div class="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border border-purple-200">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Vehicle Verified
+    <main class="pt-24 pb-12 px-6 lg:px-8 min-h-screen flex items-start justify-center">
+        <div class="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <section class="lg:col-span-8">
+                <div class="glass-card rounded-3xl p-8 border border-white/10 shadow-2xl shadow-indigo-950/40">
+                    <h2 class="headline-font text-2xl font-bold tracking-tight text-indigo-100 mb-6">Verify Vehicle Details</h2>
+
+                    <form id="verifyForm" class="mb-8">
+                        <label class="block label-font text-xs uppercase tracking-wider text-[#9baad6] mb-2">VIN Verification</label>
+                        <div class="flex gap-3">
+                            <input type="text" id="verifyVin" required
+                                   class="flex-1 bg-[#081329] border border-[#38476d]/20 rounded-xl px-4 py-3 text-[#dee5ff] placeholder-[#38476d]/50 focus:border-[#9093ff]/50 focus:bg-[#0f1b31] transition-all duration-200 outline-none"
+                                   placeholder="Enter VIN to verify">
+                            <button type="submit"
+                                    class="px-6 py-3 bg-gradient-to-r from-[#9093ff] to-[#7073ff] text-white rounded-xl font-bold shadow-lg hover:shadow-indigo-900/40 transition-all duration-200 active:scale-95">
+                                Verify
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="vehicleInfo" class="hidden">
+                        <div class="bg-[#081329]/70 border border-[#38476d]/20 rounded-2xl p-6">
+                            <h3 class="headline-font text-xl font-semibold text-[#dee5ff] mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[#9093ff]">task_alt</span>
+                                Vehicle Verified
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-[#0f1b31] border border-[#38476d]/20 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-1">VIN</p>
+                                    <p id="infoVin" class="font-semibold text-[#dee5ff]"></p>
+                                </div>
+                                <div class="bg-[#0f1b31] border border-[#38476d]/20 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-1">Model</p>
+                                    <p id="infoModel" class="font-semibold text-[#dee5ff]"></p>
+                                </div>
+                                <div class="bg-[#0f1b31] border border-[#38476d]/20 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-1">Color</p>
+                                    <p id="infoColor" class="font-semibold text-[#dee5ff]"></p>
+                                </div>
+                                <div class="bg-[#0f1b31] border border-[#38476d]/20 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-1">Manufacturer</p>
+                                    <p id="infoCompany" class="font-semibold text-[#dee5ff]"></p>
+                                </div>
+                                <div class="bg-[#0f1b31] border border-[#38476d]/20 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-1">Owner Name</p>
+                                    <p id="infoOwnerName" class="font-semibold text-[#dee5ff]"></p>
+                                </div>
+                                <div class="bg-[#0f1b31] border border-[#38476d]/20 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-1">Owner ID</p>
+                                    <p id="infoOwnerId" class="font-semibold text-[#dee5ff]"></p>
+                                </div>
+
+                                <div class="md:col-span-2 bg-[#0f1b31] border border-[#38476d]/20 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-2">Vehicle Image</p>
+                                    <div id="vehicleImageContainer" class="hidden">
+                                        <img id="vehicleImage" class="w-full h-64 object-cover rounded-xl border border-[#38476d]/20" alt="Vehicle" />
+                                    </div>
+                                    <p id="noImageText" class="text-[#9baad6]/70 italic">No image available</p>
+                                </div>
+
+                                <div class="md:col-span-2 bg-[#0f1b31] border border-[#38476d]/20 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-2">Vehicle Documents</p>
+                                    <div id="documentsContainer" class="space-y-2">
+                                        <p id="noDocumentsText" class="text-[#9baad6]/70 italic">No documents available</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0f1b31] border border-[#9093ff]/30 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-1">Total Distance Run</p>
+                                    <p id="infoDistance" class="font-bold text-xl text-[#9093ff]"></p>
+                                </div>
+                                <div class="bg-[#0f1b31] border border-[#ffb3ad]/30 p-4 rounded-xl">
+                                    <p class="text-xs uppercase tracking-wide text-[#9baad6] mb-1">Last Service Date</p>
+                                    <p id="infoServiceDate" class="font-bold text-lg text-[#ffb3ad]"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="notFoundMessage" class="hidden mt-6 p-4 rounded-xl border border-[#ffb3ad]/40 bg-[#2a1a20]/70 text-[#ffccc7]">
+                        Vehicle not found in blockchain registry.
+                    </div>
+
+                    <div id="statusMessage" class="hidden mt-6 p-4 rounded-xl"></div>
+                </div>
+            </section>
+
+            <aside class="lg:col-span-4">
+                <div class="glass-card rounded-3xl p-6 border border-white/10 shadow-2xl shadow-indigo-950/40 mb-8">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 rounded-xl bg-gradient-to-br from-[#9093ff]/20 to-[#7073ff]/10">
+                            <span class="material-symbols-outlined text-[#9093ff]">gpp_good</span>
+                        </div>
+                        <div>
+                            <h3 class="headline-font text-sm font-semibold text-indigo-100">Immutable Verification</h3>
+                            <p class="text-xs text-[#9baad6] mt-2">Every verification reads directly from blockchain state and linked IPFS data for tamper-proof checks.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-6 border border-white/10 shadow-2xl shadow-indigo-950/40">
+                    <h3 class="headline-font text-lg font-semibold tracking-tight text-indigo-100 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[#ffb3ad]">history</span>
+                        Recent Verifications
                     </h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <p class="text-sm text-gray-600 mb-1">VIN</p>
-                            <p id="infoVin" class="font-semibold text-lg"></p>
-                        </div>
-                        
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <p class="text-sm text-gray-600 mb-1">Model</p>
-                            <p id="infoModel" class="font-semibold text-lg"></p>
-                        </div>
-                        
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <p class="text-sm text-gray-600 mb-1">Color</p>
-                            <p id="infoColor" class="font-semibold text-lg"></p>
-                        </div>
-                        
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <p class="text-sm text-gray-600 mb-1">Manufacturer</p>
-                            <p id="infoCompany" class="font-semibold text-lg"></p>
-                        </div>
-                        
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <p class="text-sm text-gray-600 mb-1">Owner Name</p>
-                            <p id="infoOwnerName" class="font-semibold text-lg"></p>
-                        </div>
-                        
-                        <div class="bg-white p-4 rounded-lg shadow">
-                            <p class="text-sm text-gray-600 mb-1">Owner ID</p>
-                            <p id="infoOwnerId" class="font-semibold text-lg"></p>
-                        </div>
-
-                        <!-- Vehicle Image Section -->
-                        <div class="bg-white p-4 rounded-lg shadow md:col-span-2">
-                            <p class="text-sm text-gray-600 mb-2">Vehicle Image</p>
-                            <div id="vehicleImageContainer" class="hidden">
-                                <img id="vehicleImage" class="w-full h-64 object-cover rounded-lg border-2 border-gray-200" alt="Vehicle" />
-                            </div>
-                            <p id="noImageText" class="text-gray-400 italic">No image available</p>
-                        </div>
-
-                        <!-- Documents Section -->
-                        <div class="bg-white p-4 rounded-lg shadow md:col-span-2">
-                            <p class="text-sm text-gray-600 mb-2">Vehicle Documents</p>
-                            <div id="documentsContainer" class="space-y-2">
-                                <p id="noDocumentsText" class="text-gray-400 italic">No documents available</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-4 rounded-lg shadow border-2 border-blue-300">
-                            <p class="text-sm text-gray-600 mb-1">Total Distance Run</p>
-                            <p id="infoDistance" class="font-bold text-2xl text-blue-600"></p>
-                        </div>
-                        
-                        <div class="bg-white p-4 rounded-lg shadow border-2 border-green-300">
-                            <p class="text-sm text-gray-600 mb-1">Last Service Date</p>
-                            <p id="infoServiceDate" class="font-bold text-lg text-green-600"></p>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 p-4 bg-white rounded-lg shadow">
-                        <p class="text-sm text-gray-600 mb-2">Blockchain Status</p>
-                        <div class="flex items-center">
-                            <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                            <span class="text-sm font-semibold text-gray-700">Verified on Ethereum Blockchain</span>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-2">This data is immutable and traceable</p>
+                    <div id="recentVerifications" class="space-y-3 max-h-96 overflow-y-auto">
+                        <p class="text-[#9baad6] text-center py-4">No recent verifications</p>
                     </div>
                 </div>
-            </div>
-
-            <div id="notFoundMessage" class="hidden mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                    </svg>
-                    <span class="text-yellow-800">Vehicle not found in blockchain registry</span>
-                </div>
-            </div>
-
-            <div id="statusMessage" class="hidden mt-4 p-4 rounded-lg"></div>
+            </aside>
         </div>
-
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto mt-8 border border-purple-100">
-            <div class="flex items-center mb-6">
-                <svg class="w-6 h-6 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                </svg>
-                <h2 class="text-2xl font-bold text-gray-800">Recent Verifications</h2>
-            </div>
-            <div id="recentVerifications" class="space-y-2">
-                <p class="text-gray-500 text-center py-4">No recent verifications</p>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script src="config.js"></script>
     <script type="module" src="../src/js/web3.js"></script>

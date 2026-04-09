@@ -3,192 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dealership Dashboard - Vehicle Registration</title>
+    <title>Dealership Dashboard - Vehicle Registry</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <style>
+        :root {
+            --bg: #060e20;
+            --surface-low: #081329;
+            --surface-high: rgba(20, 36, 73, 0.7);
+            --surface-highest: #142449;
+            --primary: #9093ff;
+            --primary-strong: #7073ff;
+            --primary-dim: #6063ee;
+            --text: #dee5ff;
+            --muted: #9baad6;
+            --border: rgba(56, 71, 109, 0.15);
+            --tertiary: #ffb3ad;
+        }
+
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .headline-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .label-font {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .glass-card {
+            background: var(--surface-high);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .ethereal-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 100%;
+            background: radial-gradient(circle, rgba(144, 147, 255, 0.08) 0%, rgba(144, 147, 255, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        input::placeholder {
+            color: rgba(56, 71, 109, 0.4) !important;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(144, 147, 255, 0.3);
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 min-h-screen">
-    <nav class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-4 shadow-2xl">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white/20 p-2 rounded-lg">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </div>
-                <h1 class="text-2xl font-bold">Dealership Dashboard</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm">
-                    <span id="navAccount" class="text-sm font-mono"></span>
-                </div>
-                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105 flex items-center space-x-2 shadow-lg">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                    </svg>
-                    <span>Logout</span>
-                </button>
-            </div>
+<body class="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div class="ethereal-glow top-[-10%] left-[-10%]"></div>
+    <div class="ethereal-glow bottom-[-10%] right-[-10%]"></div>
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-50 bg-[#060e20]/60 backdrop-blur-md shadow-2xl shadow-indigo-950/20 px-6 lg:px-8 py-4 flex justify-between items-center border-b border-white/5">
+        <div class="flex items-center gap-8">
+            <span class="headline-font tracking-tight text-xl font-bold text-indigo-100">Vehicle Ledger</span>
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="#" class="headline-font tracking-tight text-indigo-400 border-b-2 border-indigo-500 pb-1 hover:text-indigo-300 transition-colors text-sm">Inventory</a>
+            </nav>
         </div>
-    </nav>
-
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 max-w-2xl mx-auto border border-blue-100">
-            <div class="flex items-center mb-6">
-                <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-xl shadow-lg mr-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Register New Vehicle</h2>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 px-4 py-2 bg-[#142449] rounded-full border border-[#38476d]/30 shadow-inner">
+                <div class="w-2 h-2 rounded-full bg-[#9093ff] shadow-[0_0_8px_rgba(144,147,255,1)]"></div>
+                <span id="navAccount" class="label-font text-sm font-medium tracking-wider text-[#dee5ff]"></span>
             </div>
-            
-            <form id="vehicleForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">VIN (Vehicle Identification Number)</label>
-                    <input type="text" id="vin" required 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Enter 17-character VIN">
-                </div>
+            <button class="p-2 rounded-full hover:bg-white/10 transition-colors hidden sm:block">
+                <svg class="w-5 h-5 text-[#9baad6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+            </button>
+            <button id="logoutBtn" class="px-5 py-2 bg-[#ffb3ad] text-[#2f0007] headline-font font-bold rounded-full active:scale-95 transition-all duration-200 shadow-lg text-sm">
+                Disconnect
+            </button>
+        </div>
+    </header>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Color</label>
-                        <input type="text" id="color" required 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="e.g., Red">
-                    </div>
+    <main class="pt-24 pb-12 px-6 lg:px-8 min-h-screen flex items-start justify-center">
+        <div class="w-full max-w-7xl">
+            <!-- Two Column Grid Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left Column: Form (7/12) -->
+                <div class="lg:col-span-7">
+                    <!-- Form Container -->
+                    <div class="glass-card rounded-3xl p-8 border border-white/10 shadow-2xl shadow-indigo-950/40">
+                        <h2 class="headline-font text-2xl font-bold tracking-tight text-indigo-100 mb-8">Register New Vehicle</h2>
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Model</label>
-                        <input type="text" id="model" required 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="e.g., Honda Civic">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Company/Manufacturer</label>
-                    <input type="text" id="company" required 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Honda">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Owner Name</label>
-                    <input type="text" id="ownerName" required 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Enter owner's full name">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Owner ID (License/Passport)</label>
-                    <input type="text" id="ownerId" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Enter owner's ID number">
-                </div>
-
-                <!-- IPFS File Uploads -->
-                <div class="border-t border-gray-200 pt-6 mt-6">
-                    <div class="flex items-center mb-4">
-                        <svg class="w-5 h-5 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                        </svg>
-                        <h3 class="text-lg font-semibold text-gray-800">Upload Documents (IPFS)</h3>
-                    </div>
-
-                    <!-- Vehicle Image Upload -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Vehicle Image <span class="text-gray-500 font-normal">(Required for registration)</span>
-                        </label>
-                        <div class="flex items-center justify-center w-full">
-                            <label for="vehicleImage" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-purple-400 transition-all">
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                    <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> vehicle image</p>
-                                    <p class="text-xs text-gray-500">PNG, JPG, GIF (MAX. 10MB)</p>
+                        <form id="vehicleForm" class="space-y-8">
+                            <!-- Section 1: Vehicle Specifications -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="p-3 rounded-xl bg-gradient-to-br from-[#9093ff]/20 to-[#7073ff]/10">
+                                        <span class="material-symbols-outlined text-[#9093ff] text-lg">info</span>
+                                    </div>
+                                    <h3 class="headline-font text-lg font-semibold text-[#dee5ff] tracking-tight">Vehicle Specifications</h3>
                                 </div>
-                                <input id="vehicleImage" type="file" class="hidden" accept="image/*" />
-                            </label>
-                        </div>
-                        <div id="imagePreviewContainer" class="mt-4 hidden">
-                            <div class="relative">
-                                <img id="imagePreview" class="w-full h-48 object-cover rounded-lg border-2 border-gray-200" alt="Vehicle preview" />
-                                <button type="button" id="removeImageBtn" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="mt-2 flex items-center justify-between">
-                                <span id="imageInfo" class="text-sm text-gray-600"></span>
-                                <div id="imageUploadStatus" class="flex items-center space-x-2">
-                                    <span class="text-sm text-gray-600">Status: </span>
-                                    <span id="imageStatusText" class="text-sm font-semibold text-gray-800">Not uploaded</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block label-font text-xs uppercase tracking-wider text-[#9baad6] mb-2">VIN (Vehicle Identification Number)</label>
+                                        <input type="text" id="vin" required 
+                                               class="w-full bg-[#081329] border border-[#38476d]/20 rounded-xl px-4 py-3 text-[#dee5ff] placeholder-[#38476d]/40 focus:border-[#9093ff]/50 focus:bg-[#0f1b31] transition-all duration-200 outline-none"
+                                               placeholder="Enter 17-character VIN">
+                                    </div>
 
-                    <!-- Documents Upload -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Vehicle Documents <span class="text-gray-500 font-normal">(RC, Insurance, etc.)</span>
-                        </label>
-                        <div class="flex items-center justify-center w-full">
-                            <label for="vehicleDocuments" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-purple-400 transition-all">
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <svg class="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    <p class="mb-1 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> documents</p>
-                                    <p class="text-xs text-gray-500">PDF, JPG, PNG (Multiple files allowed)</p>
-                                </div>
-                                <input id="vehicleDocuments" type="file" class="hidden" multiple accept=".pdf,.jpg,.jpeg,.png" />
-                            </label>
-                        </div>
-                        <div id="documentsList" class="mt-4 hidden">
-                            <div class="bg-gray-50 rounded-lg p-4">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Selected Files:</h4>
-                                <ul id="documentsListItems" class="space-y-2"></ul>
-                                <div class="mt-3 pt-3 border-t border-gray-200">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm text-gray-600">Upload Status: </span>
-                                        <span id="documentsStatusText" class="text-sm font-semibold text-gray-800">Pending</span>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block label-font text-xs uppercase tracking-wider text-[#9baad6] mb-2">Color</label>
+                                            <input type="text" id="color" required 
+                                                   class="w-full bg-[#081329] border border-[#38476d]/20 rounded-xl px-4 py-3 text-[#dee5ff] placeholder-[#38476d]/40 focus:border-[#9093ff]/50 focus:bg-[#0f1b31] transition-all duration-200 outline-none"
+                                                   placeholder="e.g., Red">
+                                        </div>
+                                        <div>
+                                            <label class="block label-font text-xs uppercase tracking-wider text-[#9baad6] mb-2">Model</label>
+                                            <input type="text" id="model" required 
+                                                   class="w-full bg-[#081329] border border-[#38476d]/20 rounded-xl px-4 py-3 text-[#dee5ff] placeholder-[#38476d]/40 focus:border-[#9093ff]/50 focus:bg-[#0f1b31] transition-all duration-200 outline-none"
+                                                   placeholder="e.g., Honda Civic">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block label-font text-xs uppercase tracking-wider text-[#9baad6] mb-2">Company/Manufacturer</label>
+                                        <input type="text" id="company" required 
+                                               class="w-full bg-[#081329] border border-[#38476d]/20 rounded-xl px-4 py-3 text-[#dee5ff] placeholder-[#38476d]/40 focus:border-[#9093ff]/50 focus:bg-[#0f1b31] transition-all duration-200 outline-none"
+                                               placeholder="e.g., Honda">
                                     </div>
                                 </div>
                             </div>
-                        </div>
+
+                            <!-- Section 2: Ownership Details -->
+                            <div class="border-t border-white/5 pt-8">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="p-3 rounded-xl bg-gradient-to-br from-[#ffb3ad]/20 to-[#ff9a90]/10">
+                                        <span class="material-symbols-outlined text-[#ffb3ad] text-lg">person</span>
+                                    </div>
+                                    <h3 class="headline-font text-lg font-semibold text-[#dee5ff] tracking-tight">Ownership Details</h3>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block label-font text-xs uppercase tracking-wider text-[#9baad6] mb-2">Owner Name</label>
+                                        <input type="text" id="ownerName" required 
+                                               class="w-full bg-[#081329] border border-[#38476d]/20 rounded-xl px-4 py-3 text-[#dee5ff] placeholder-[#38476d]/40 focus:border-[#9093ff]/50 focus:bg-[#0f1b31] transition-all duration-200 outline-none"
+                                               placeholder="Enter owner's full name">
+                                    </div>
+                                    <div>
+                                        <label class="block label-font text-xs uppercase tracking-wider text-[#9baad6] mb-2">Owner ID (License/Passport)</label>
+                                        <input type="text" id="ownerId" required
+                                               class="w-full bg-[#081329] border border-[#38476d]/20 rounded-xl px-4 py-3 text-[#dee5ff] placeholder-[#38476d]/40 focus:border-[#9093ff]/50 focus:bg-[#0f1b31] transition-all duration-200 outline-none"
+                                               placeholder="Enter owner's ID number">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Digital Assets & Proofs -->
+                            <div class="border-t border-white/5 pt-8">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="p-3 rounded-xl bg-gradient-to-br from-[#7073ff]/20 to-[#5561ff]/10">
+                                        <span class="material-symbols-outlined text-[#7073ff] text-lg">cloud_upload</span>
+                                    </div>
+                                    <h3 class="headline-font text-lg font-semibold text-[#dee5ff] tracking-tight">Digital Assets & Proofs</h3>
+                                </div>
+
+                                <!-- Vehicle Image Upload -->
+                                <div class="mb-6">
+                                    <label class="label-font text-xs uppercase tracking-wider text-[#9baad6] mb-3 block">Vehicle Image <span class="text-[#ffb3ad]">*</span></label>
+                                    <label for="vehicleImage" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-[#38476d]/40 rounded-2xl bg-[#081329]/50 hover:bg-[#0f1b31]/70 hover:border-[#9093ff]/50 transition-all cursor-pointer group">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="p-3 rounded-full bg-[#9093ff]/10 group-hover:bg-[#9093ff]/20 transition-all">
+                                                <span class="material-symbols-outlined text-[#9093ff] text-3xl">image</span>
+                                            </div>
+                                            <span class="label-font text-sm text-[#9baad6] mt-2">Click to upload vehicle image</span>
+                                            <span class="text-xs text-[#38476d] mt-1">PNG, JPG, GIF (MAX. 10MB)</span>
+                                        </div>
+                                        <input id="vehicleImage" type="file" class="hidden" accept="image/*" />
+                                    </label>
+                                    <div id="imagePreviewContainer" class="mt-4 hidden">
+                                        <div class="relative group">
+                                            <img id="imagePreview" class="w-full h-40 object-cover rounded-2xl border border-[#38476d]/20" alt="Vehicle preview" />
+                                            <button type="button" id="removeImageBtn" class="absolute top-2 right-2 p-2 rounded-full bg-[#ffb3ad] text-[#2f0007] opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-[#ff9a90] active:scale-95">
+                                                <span class="material-symbols-outlined text-lg">close</span>
+                                            </button>
+                                        </div>
+                                        <div class="mt-3 text-sm">
+                                            <span id="imageInfo" class="block text-[#9baad6] text-xs mb-1"></span>
+                                            <span id="imageUploadStatus" class="text-[#9baad6]">Status: </span>
+                                            <span id="imageStatusText" class="text-[#9093ff] font-semibold">Not uploaded</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Documents Upload -->
+                                <div>
+                                    <label class="label-font text-xs uppercase tracking-wider text-[#9baad6] mb-3 block">Documents <span class="text-[#9baad6]/60">(RC, Insurance, etc.)</span></label>
+                                    <label for="vehicleDocuments" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-[#38476d]/40 rounded-2xl bg-[#081329]/50 hover:bg-[#0f1b31]/70 hover:border-[#7073ff]/50 transition-all cursor-pointer group">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="p-3 rounded-full bg-[#7073ff]/10 group-hover:bg-[#7073ff]/20 transition-all">
+                                                <span class="material-symbols-outlined text-[#7073ff] text-3xl">file_upload</span>
+                                            </div>
+                                            <span class="label-font text-sm text-[#9baad6] mt-2">Click to upload documents</span>
+                                            <span class="text-xs text-[#38476d] mt-1">PDF, JPG, PNG (Multiple files)</span>
+                                        </div>
+                                        <input id="vehicleDocuments" type="file" class="hidden" multiple accept=".pdf,.jpg,.jpeg,.png" />
+                                    </label>
+                                    <div id="documentsList" class="mt-4 hidden">
+                                        <div class="bg-[#081329]/50 border border-[#38476d]/20 rounded-xl p-4">
+                                            <h4 class="label-font text-xs uppercase tracking-wider text-[#9baad6] mb-3">Selected Files:</h4>
+                                            <ul id="documentsListItems" class="space-y-2"></ul>
+                                            <div class="mt-3 pt-3 border-t border-white/5">
+                                                <span class="text-[#9baad6] text-sm">Status: </span>
+                                                <span id="documentsStatusText" class="text-[#9093ff] font-semibold text-sm">Pending</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" 
+                                    class="w-full px-6 py-4 bg-gradient-to-r from-[#9093ff] to-[#7073ff] hover:from-[#a5a8ff] hover:to-[#8485ff] text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg shadow-indigo-950/40 hover:shadow-xl hover:shadow-indigo-900/60 active:scale-95 headline-font tracking-tight flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">add_circle</span>
+                                Register Vehicle
+                            </button>
+
+                            <!-- Status Message -->
+                            <div id="statusMessage" class="hidden p-4 rounded-xl border text-sm label-font"></div>
+                        </form>
                     </div>
                 </div>
 
-                <button type="submit" 
-                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    <span>Register Vehicle</span>
-                </button>
-            </form>
+                <!-- Right Column: Recent Registrations (5/12) -->
+                <div class="lg:col-span-5">
+                    <!-- Immutable Ledger Info Card -->
+                    <div class="glass-card rounded-3xl p-6 border border-white/10 shadow-2xl shadow-indigo-950/40 mb-8">
+                        <div class="flex items-start gap-4">
+                            <div class="p-3 rounded-xl bg-gradient-to-br from-[#9093ff]/20 to-[#7073ff]/10 flex-shrink-0">
+                                <span class="material-symbols-outlined text-[#9093ff] text-lg">check_circle</span>
+                            </div>
+                            <div>
+                                <h3 class="headline-font text-sm font-semibold tracking-tight text-indigo-100 mb-2">Immutable Ledger</h3>
+                                <p class="text-xs text-[#9baad6] leading-relaxed">All vehicle records are permanently recorded on the Ethereum blockchain and cannot be altered or removed.</p>
+                            </div>
+                        </div>
+                    </div>
 
-            <div id="statusMessage" class="hidden mt-4 p-4 rounded-lg"></div>
-        </div>
-
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 max-w-2xl mx-auto mt-8 border border-blue-100">
-            <div class="flex items-center mb-6">
-                <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-                <h2 class="text-2xl font-bold text-gray-800">Recent Registrations</h2>
+                    <!-- Recent Registrations List -->
+                    <div class="glass-card rounded-3xl p-6 border border-white/10 shadow-2xl shadow-indigo-950/40">
+                        <h3 class="headline-font text-lg font-semibold tracking-tight text-indigo-100 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[#ffb3ad]">history</span>
+                            Recent Registrations
+                        </h3>
+                        <div id="recentVehicles" class="space-y-3 max-h-96 overflow-y-auto">
+                            <div class="text-center py-8">
+                                <span class="material-symbols-outlined text-[#38476d] text-3xl block mb-2">inbox</span>
+                                <p class="text-[#9baad6] text-sm">No vehicles registered yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="recentVehicles" class="space-y-2">
-                <p class="text-gray-500 text-center py-4">No vehicles registered yet</p>
-            </div>
         </div>
-    </div>
+    </main>
 
     <script src="config.js"></script>
     <script type="module" src="../src/js/web3.js"></script>
